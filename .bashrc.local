@@ -1,0 +1,173 @@
+HISTSIZE=-1
+#unset VISUAL
+
+### cdhist ###
+
+_cdhistory () {
+    if [ $# -eq 0 ]; then
+	builtin cd
+    else 
+	builtin cd "$*"
+    fi
+    # skip if already bookmarked
+    grep -q "^${PWD}$" $HOME/.cdhistory 2>/dev/null && return
+
+    # skip logging for some paths
+    case "$PWD" in
+	$HOME|/|/tmp) return ;;
+    esac
+    pwd >> $HOME/.cdhistory 2>/dev/null
+    uniq $HOME/.cdhistory{,.uniq} 2>/dev/null
+    mv $HOME/.cdhistory{.uniq,} &>/dev/null
+}
+
+cdhistory () {
+    [ -f $HOME/.cdhistory ] || return
+    if [ $# -eq 0 ]; then 
+	cat -n $HOME/.cdhistory
+	return
+    fi
+    if [ "$1" = "-e" ]; then
+	vim $HOME/.cdhistory
+	# you can sort uniq in vim :sort u
+	return
+    fi
+    if echo $1 | grep -q '^[[:digit:]]\+$'; then
+	# cd by number
+	_cdhistory $(sed -n "${1}p" $HOME/.cdhistory)
+    elif echo $1 | grep -q '[[:alnum:]]\+\$$'; then
+	# cd by end pattern
+	_cdhistory $(grep "$1" $HOME/.cdhistory|head -n 1)
+    else
+	# just grep for pattern
+	cat -n $HOME/.cdhistory | grep -i "$*"
+    fi
+}
+
+datediff() {
+    local sec
+    case $1 in
+	-s) sec=1; shift;;
+	-m) sec=60; shift;;
+	-h) sec=3600; shift;;
+	-d) sec=86400; shift;;
+	 *) sec=1; local pretty=1;;
+     esac
+
+    d1=$(date -d "$1" +%s)
+    d2=$(date -d "$2" +%s)
+    local diffSec=$(( d1 - d2 ))
+    if ((diffSec < 0)); then abs=-1; else abs=1; fi
+    local res=$(( diffSec / (abs*sec) ))
+    if [ -n "$pretty" ]; then
+	echo $res | awk '{printf "%d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
+    else
+	echo $res
+    fi
+}
+
+mkcd () { mkdir "$1"; cd "$1"; }
+
+alias cd=_cdhistory
+alias cdhist=cdhistory
+alias cdhi=cdhistory
+
+setcursor () {
+case $TERM in
+    xterm*) ;;
+    *) echo "Works only for xterm :("; return ;;
+esac
+case $1 in
+    beam) 
+	echo -e -n "\x1b[\x35 q" # changes to blinking bar
+	;;
+    under*)
+	echo -e -n "\x1b[\x33 q" # changes to blinking underline
+	;;
+    *)
+	echo "Give a cursor style: beam|under"
+	;;
+esac
+}
+### cdhist end
+
+alias docker=docker.io
+oku () { okular $@ &>/dev/null & }
+vman() {
+    [ "$1" = "-k" ] && /usr/bin/man $@ || \
+    man $* | col -b | vim -c 'set ft=man nomod nolist' -
+}
+alias man=vman
+
+# fix umask problems
+alias fixfileperms='find . -maxdepth 2 -type f -exec chmod 644 {} \;'
+alias fixdirsperms='find . -maxdepth 2 -type d -exec chmod 755 {} \;'
+alias fixperms='fixfileperms; fixdirsperms'
+
+umask 0022
+
+#so as not to be disturbed by Ctrl-S ctrl-Q in terminals:
+stty -ixon -ixoff
+
+. $HOME/git-prompt.sh
+export GIT_PS1_SHOWDIRTYSTATE=1
+#export PS1=' (\t) { \w }\n \$-> '
+#export PS1='\n (\t) \w\n > '
+#export PS1='$(printf "\n ($(date +%T)) $PWD\n > ")'
+MYCOLOR_PROMPT="\e[1;30m"
+MYCOLOR_RESET="\e[0m"
+export PS1="\n${MYCOLOR_PROMPT}"'(\t) \h: \w $(__git_ps1 "(%s)")'"${MYCOLOR_RESET}\n> "
+
+bind "\C-p":history-search-backward
+bind "\C-n":history-search-forward
+set completion-ignore-case on
+
+export EDITOR=vim
+export LESSOPEN="|$HOME/bin/lesspipe.sh %s"
+#export BROWSER=chromi
+export BROWSER='firejail firefox'
+# export TERMINAL=xterm
+export PAGER=less
+# export MANPAGER="sh -c \"col -b | view -c 'set ft=man nomod nolist titlestring=MANPAGE' -\""
+# export MANPAGER="col -b | vim -c 'set ft=man ts=8 nomod nolist nonu' -c 'nnoremap i <nop>' -"
+export GOPATH=$HOME/progs/go
+export PATH=$GOPATH/bin:$HOME/bin:$PATH:$HOME/.npm-global/bin:$HOME/.nimble/bin
+export NPM_CONFIG_PREFIX=~/.npm-global
+export XDG_CONFIG_HOME=$HOME/.config
+
+# activate nix profile
+#. ~/.nix-profile/etc/profile.d/nix.sh
+alias query='xbps-query'
+alias insta='sudo xbps-install'
+alias gitlog='git log --graph --oneline --decorate --all  --branches=* --abbrev-commit'
+alias gl='git log --graph --oneline --decorate --all  --branches=* --abbrev-commit'
+alias gll='git log --graph --oneline --decorate --all  --branches=* --abbrev-commit --name-status'
+alias nimc='nim c --verbosity:0'
+alias nimct='nimc --threads:on'
+alias nimcr='nimc -d:release'
+alias nimctr='nimct -d:release'
+# alias vim='firejail vim'
+alias dstart='. ~/dlang/dmd-2.071.0/activate'
+alias gitdotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+
+export NVIM_TUI_ENABLE_CURSOR_SHAPE=1
+if [[ $TERM =~ "256color" ]]; then
+echo -e -n "\x1b[\x35 q" # changes to blinking bar
+# echo -e -n "\x1b[\x33 q" # changes to blinking underline
+export NVIM_TUI_ENABLE_TRUE_COLOR=1
+fi
+
+### xmodmap -pke # to see all keys
+# xmodmap -e "keycode 124 = NoSymbol"
+# xmodmap -e "keycode 150 = NoSymbol"
+
+# auto startx
+if [ -z "$DISPLAY" ] && [ $(tty) = "/dev/tty1" ]; then
+    startx
+fi
+
+# [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="/home/stelu/.sdkman"
+[[ -s "/home/stelu/.sdkman/bin/sdkman-init.sh" ]] && source "/home/stelu/.sdkman/bin/sdkman-init.sh"
