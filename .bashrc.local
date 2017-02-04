@@ -1,8 +1,10 @@
+### To include me add this to the end of .bashrc:
+### [[ -f $HOME/.bashrc.local ]] && . $HOME/.bashrc.local
+
 HISTSIZE=-1
 #unset VISUAL
 
-### cdhist ###
-
+# my attempt at path history
 _cdhistory () {
     if [ $# -eq 0 ]; then
 	builtin cd
@@ -20,7 +22,6 @@ _cdhistory () {
     uniq $HOME/.cdhistory{,.uniq} 2>/dev/null
     mv $HOME/.cdhistory{.uniq,} &>/dev/null
 }
-
 cdhistory () {
     [ -f $HOME/.cdhistory ] || return
     if [ $# -eq 0 ]; then 
@@ -43,6 +44,9 @@ cdhistory () {
 	cat -n $HOME/.cdhistory | grep -i "$*"
     fi
 }
+alias cd=_cdhistory
+alias cdhist=cdhistory
+
 
 datediff() {
     local sec
@@ -66,12 +70,8 @@ datediff() {
     fi
 }
 
+
 mkcd () { mkdir "$1"; cd "$1"; }
-
-alias cd=_cdhistory
-alias cdhist=cdhistory
-alias cdhi=cdhistory
-
 setcursor () {
 case $TERM in
     xterm*) ;;
@@ -89,10 +89,8 @@ case $1 in
 	;;
 esac
 }
-### cdhist end
 
 alias docker=docker.io
-oku () { okular $@ &>/dev/null & }
 vman() {
     [ "$1" = "-k" ] && /usr/bin/man $@ || \
     man $* | col -b | vim -c 'set ft=man nomod nolist' -
@@ -109,7 +107,7 @@ umask 0022
 #so as not to be disturbed by Ctrl-S ctrl-Q in terminals:
 stty -ixon -ixoff
 
-. $HOME/git-prompt.sh
+. $HOME/bin/git-prompt.sh
 export GIT_PS1_SHOWDIRTYSTATE=1
 #export PS1=' (\t) { \w }\n \$-> '
 #export PS1='\n (\t) \w\n > '
@@ -118,10 +116,12 @@ MYCOLOR_PROMPT="\e[1;30m"
 MYCOLOR_RESET="\e[0m"
 export PS1="\n${MYCOLOR_PROMPT}"'(\t) \h: \w $(__git_ps1 "(%s)")'"${MYCOLOR_RESET}\n> "
 
+# history search
 bind "\C-p":history-search-backward
 bind "\C-n":history-search-forward
 set completion-ignore-case on
 
+alias vim=vim-huge
 export EDITOR=vim
 export LESSOPEN="|$HOME/bin/lesspipe.sh %s"
 #export BROWSER=chromi
@@ -132,13 +132,15 @@ export PAGER=less
 # export MANPAGER="col -b | vim -c 'set ft=man ts=8 nomod nolist nonu' -c 'nnoremap i <nop>' -"
 export GOPATH=$HOME/progs/go
 export PATH=$GOPATH/bin:$HOME/bin:$PATH:$HOME/.npm-global/bin:$HOME/.nimble/bin
-export NPM_CONFIG_PREFIX=~/.npm-global
 export XDG_CONFIG_HOME=$HOME/.config
+# export NPM_CONFIG_PREFIX=~/.npm-global
+unset NPM_CONFIG_PREFIX
+export NVM_DIR="/home/$USER/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+export sdcard1=/storage/sdcard1
 
 # activate nix profile
 #. ~/.nix-profile/etc/profile.d/nix.sh
-alias query='xbps-query'
-alias insta='sudo xbps-install'
 alias gitlog='git log --graph --oneline --decorate --all  --branches=* --abbrev-commit'
 alias gl='git log --graph --oneline --decorate --all  --branches=* --abbrev-commit'
 alias gll='git log --graph --oneline --decorate --all  --branches=* --abbrev-commit --name-status'
@@ -146,9 +148,9 @@ alias nimc='nim c --verbosity:0'
 alias nimct='nimc --threads:on'
 alias nimcr='nimc -d:release'
 alias nimctr='nimct -d:release'
-# alias vim='firejail vim'
 alias dstart='. ~/dlang/dmd-2.071.0/activate'
 alias gitdotfiles='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias expose=$HOME/src/Expose/expose.sh
 
 export NVIM_TUI_ENABLE_CURSOR_SHAPE=1
 if [[ $TERM =~ "256color" ]]; then
@@ -161,13 +163,14 @@ fi
 # xmodmap -e "keycode 124 = NoSymbol"
 # xmodmap -e "keycode 150 = NoSymbol"
 
+# [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+# export SDKMAN_DIR="/home/$USER/.sdkman"
+# [[ -s "/home/$USER/.sdkman/bin/sdkman-init.sh" ]] && source "/home/$USER/.sdkman/bin/sdkman-init.sh"
+
 # auto startx
 if [ -z "$DISPLAY" ] && [ $(tty) = "/dev/tty1" ]; then
     startx
 fi
 
-# [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="/home/stelu/.sdkman"
-[[ -s "/home/stelu/.sdkman/bin/sdkman-init.sh" ]] && source "/home/stelu/.sdkman/bin/sdkman-init.sh"

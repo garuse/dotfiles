@@ -1,0 +1,38 @@
+#include ".Xresources.gruvbox"
+
+! Man page colors
+!*.colorIT: #98971a
+!*.colorBD: #98971a
+!*.colorUL: #fabd2f
+
+! Xft Settings
+Xft.dpi:        96
+!Xft.dpi:        120
+Xft.antialias:  true
+!Xft.antialias:  false
+Xft.rgba:       rgb
+Xft.autohint:   0
+!Xft.autohint:   true
+Xft.hinting:    true
+Xft.hintstyle:  hintslight
+Xft.lcdfiler:   lcddefault
+
+!! Xterm
+XTerm*termName: xterm-256color
+!XTerm*faceName: Liberation Mono:size=16:antialias=false
+!XTerm*faceName: Liberation Mono:size=12
+XTerm*faceName: DejaVuSansMono:size=12
+XTerm*scrollBar: false
+XTerm*scrollKey: true
+XTerm*alternateScroll: true
+XTerm*metaSendsEscape: true
+XTerm*internalBorder: 12
+XTerm*saveLines: 900000
+XTerm*colorBD:      6
+XTerm*colorUL:      10
+XTerm*scrollTtyOutput: false
+
+XTerm*cutNewLine: false
+XTerm*cutToBeginningOfLine: false
+XTerm*charClass: 33:48,35:48,37:48,42:48,45-47:48,64:48,95:48,126:48
+

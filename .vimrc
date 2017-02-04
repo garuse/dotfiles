@@ -28,21 +28,35 @@ endif
   \  'syntax-checking'
   \]
 
-  " \ 'ervandew/supertab',
   let g:dotspacevim_additional_plugins = [
   \ 'morhetz/gruvbox',
   \ 'YorickPeterse/happy_hacking.vim',
   \ 'roosta/vim-srcery',
   \ 'tyrannicaltoucan/vim-deep-space',
-  \ 'ajh17/VimCompletesMe',
   \ 'tpope/vim-sleuth',
   \ 'sickill/vim-pasta',
   \ 'luochen1990/rainbow',
   \ 'mattn/emmet-vim',
-  \ 'moll/vim-bbye'
+  \ 'moll/vim-bbye',
+  \ 'posva/vim-vue',
+  \ 'itchyny/lightline.vim',
+  \ 'hail2u/vim-css3-syntax',
+  \ 'wavded/vim-stylus',
+  \ 'honza/vim-snippets',
+  \ 'MarcWeber/vim-addon-mw-utils',
+  \ 'tomtom/tlib_vim',
+  \ 'garbas/vim-snipmate',
+  \ 'ervandew/supertab',
+  \ 'maralla/validator.vim'
   \]
 
-  let g:dotspacevim_excluded_plugins = []
+  let g:dotspacevim_excluded_plugins = [
+  \ 'jaxbot/browserlink.vim',
+  \ 'ajh17/VimCompletesMe',
+  \ 'skammer/vim-css-color',
+  \ 'ctrlpvim/ctrlp.vim',
+  \ 'SirVer/ultisnips',
+  \]
 
   " let g:dotspacevim_escape_key_sequence = 'fd'
 
@@ -86,6 +100,7 @@ call spacevim#bootstrap()
   set diffopt+=iwhite
   set history=10000
   set cm=blowfish2
+  set nu
 
   set backup
   " create backupdir if needed
@@ -104,10 +119,16 @@ call spacevim#bootstrap()
   set undoreload=10000 " maximum number lines to save for undo on a buffer reload
   set t_Co=256
   set cursorline
+  set lazyredraw
+  set synmaxcol=512
 
-  " bindings
+  " mappings
   vn > >gv
   vn < <gv
+  vm <c-x> "+x
+  vm <c-c> "+y
+  cno <c-v> <c-r>+
+  exe 'ino <script> <C-V>' paste#paste_cmd['i']
   no ; :
   no Q gq
   no gV `[v`]
@@ -133,6 +154,8 @@ call spacevim#bootstrap()
   cmap >fd <c-r>=expand('%:p:h').'/'<cr>
 
   let g:rainbow_active = 1
-"  let g:SuperTabDefaultCompletionType = "<c-x><c-o>"
+  " let g:SuperTabDefaultCompletionType = "<c-x><c-o>"
+  let g:SuperTabDefaultCompletionType = "context"
+  let b:vcm_tab_complete = "omni"
 
 " }}}
